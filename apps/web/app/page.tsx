@@ -197,23 +197,8 @@ function Sidebar({
     <aside className={styles.sidebar}>
       <div className={styles.sidebarTop}>
         <div className={styles.sidebarLogo}>
-          <div className={styles.logoIcon}>
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span className={styles.logoText}>MedVault</span>
+          <div className={styles.logoIcon} aria-hidden="true" />
+          <span className={styles.logoText}>CareID</span>
         </div>
 
         <nav className={styles.sidebarNav}>
@@ -406,13 +391,37 @@ function TopBar({
   searchValue,
   onSearch,
   title,
+  sidebarOpen,
+  onToggleSidebar,
 }: {
   searchValue: string;
   onSearch: (v: string) => void;
   title: string;
+  sidebarOpen: boolean;
+  onToggleSidebar: () => void;
 }) {
   return (
     <header className={styles.topBar}>
+      <button
+        className={styles.topBarMenuBtn}
+        title={sidebarOpen ? "Hide menu" : "Show menu"}
+        onClick={onToggleSidebar}
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
       <div className={styles.searchBox}>
         <svg
           width="16"
@@ -655,10 +664,11 @@ function DashboardView({
                 height="22"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#3b82f6"
+                stroke="#111111"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ transform: "translateY(1px)" }}
               >
                 <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -672,7 +682,7 @@ function DashboardView({
                 height="12"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#10b981"
+                stroke="currentColor"
                 strokeWidth="2.5"
               >
                 <path d="M23 6l-9.5 9.5-5-5L1 18" />
@@ -696,7 +706,7 @@ function DashboardView({
                 height="22"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#f59e0b"
+                stroke="#111111"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -718,7 +728,7 @@ function DashboardView({
                 height="22"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#ef4444"
+                stroke="#111111"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -744,7 +754,7 @@ function DashboardView({
                 height="22"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#10b981"
+                stroke="#111111"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -2648,6 +2658,7 @@ export default function Home() {
   const { writeContractAsync, isPending } = useWriteContract();
 
   const [activeNav, setActiveNav] = useState<NavItem>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [patientAddress, setPatientAddress] = useState("");
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -2981,7 +2992,9 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.layout}>
+    <div
+      className={`${styles.layout} ${sidebarOpen ? styles.layoutSidebarOpen : styles.layoutSidebarClosed}`}
+    >
       <Sidebar
         active={activeNav}
         onNavigate={(nav) => {
@@ -2995,6 +3008,8 @@ export default function Home() {
           searchValue={searchValue}
           onSearch={setSearchValue}
           title={navTitles[activeNav]}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen((v) => !v)}
         />
 
         <div className={styles.mainContent}>
