@@ -17,6 +17,8 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
+const devPrivateKey = process.env.EXPO_PUBLIC_DEV_WALLET_PRIVATE_KEY;
+
 /**
  * One-time cleanup of stale WalletConnect session data from AsyncStorage.
  *
@@ -59,11 +61,15 @@ async function clearStaleWcSessions(): Promise<void> {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const isDevWallet = Boolean(devPrivateKey);
   const [appKit, setAppKit] = useState<ReturnType<typeof getAppKit> | null>(
     null,
   );
 
   useEffect(() => {
+    if (isDevWallet) {
+      return;
+    }
     let cancelled = false;
 
     (async () => {
@@ -82,7 +88,24 @@ export default function RootLayout() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isDevWallet]);
+
+  const content = (
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: "modal", title: "Modal" }}
+        />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
+
+  if (isDevWallet) {
+    return content;
+  }
 
   // Show nothing (or a splash) while we wait for the cleanup + init.
   if (!appKit) {
@@ -91,17 +114,8 @@ export default function RootLayout() {
 
   return (
     <AppKitProvider instance={appKit}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="modal"
-            options={{ presentation: "modal", title: "Modal" }}
-          />
-        </Stack>
-        <AppKit />
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      {content}
+      <AppKit />
     </AppKitProvider>
   );
 }

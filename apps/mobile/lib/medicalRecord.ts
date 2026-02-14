@@ -1,4 +1,4 @@
-import { BrowserProvider, Contract } from "ethers";
+import { BrowserProvider, Contract, type Signer } from "ethers";
 import type { Provider } from "@reown/appkit-common-react-native";
 import MedicalRecord from "@/constants/MedicalRecord.json";
 import { MEDICAL_RECORD_ADDRESS } from "@/constants/address";
@@ -21,6 +21,10 @@ export type RecordItem = {
 export async function getMedicalRecordContract(provider: Provider) {
   const ethersProvider = new BrowserProvider(provider as any);
   const signer = await ethersProvider.getSigner();
+  return new Contract(MEDICAL_RECORD_ADDRESS, abi, signer);
+}
+
+export function getMedicalRecordContractWithSigner(signer: Signer) {
   return new Contract(MEDICAL_RECORD_ADDRESS, abi, signer);
 }
 
