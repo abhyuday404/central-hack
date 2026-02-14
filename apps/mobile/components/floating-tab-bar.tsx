@@ -37,6 +37,12 @@ export function FloatingTabBar({
               canPreventDefault: true,
             });
 
+            if (isCenter && isFocused) {
+              // Toggle: if already on emergency, go back to home
+              navigation.navigate("index");
+              return;
+            }
+
             if (!isFocused && !event.defaultPrevented) {
               navigation.navigate(route.name, route.params);
             }
