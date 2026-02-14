@@ -1,98 +1,161 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { ConnectButton, useAccount, useProvider } from '@reown/appkit-react-native';
 
-import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { getMedicalRecordContract, requestStatusLabel, type AccessRequest } from '@/lib/medicalRecord';
 
-export default function HomeScreen() {
+export default function ApprovalScreen() {
+  const { address, isConnected } = useAccount();
+  const { provider } = useProvider();
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [status, setStatus] = useState<string | null>(null);
+
+  const loadRequests = useCallback(async () => {
+    if (!provider || !address) {
+      setStatus('Connect your wallet to load requests.');
+      return;
+    }
+
+    try {
+      const contract = await getMedicalRecordContract(provider);
+      const data = (await contract.getRequests(address)) as AccessRequest[];
+      setRequests(data);
+      setStatus(null);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Failed to load requests.');
+    }
+  }, [address, provider]);
+
+  const resolveRequest = useCallback(
+    async (requestId: number, approve: boolean) => {
+      if (!provider || !address) {
+        setStatus('Connect your wallet to approve requests.');
+        return;
+      }
+      try {
+        setStatus(approve ? 'Approving request...' : 'Rejecting request...');
+        const contract = await getMedicalRecordContract(provider);
+        const tx = await contract.respondToRequest(requestId, approve);
+        await tx.wait();
+        await loadRequests();
+        setStatus(approve ? 'Request approved.' : 'Request rejected.');
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : 'Action failed.');
+      }
+    },
+    [address, loadRequests, provider],
+  );
+
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
+      headerBackgroundColor={{ light: '#e9f0f7', dark: '#1b2a36' }}
+      headerImage={<View style={styles.headerAccent} />}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
+        <ThemedText type="title">Access approvals</ThemedText>
+        <ThemedText type="subtitle">
+          Review hospital, doctor, or insurer requests for your records.
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+      <ThemedView style={styles.section}>
+        <ConnectButton label="Connect wallet" loadingLabel="Connecting..." />
+        <ThemedText onPress={loadRequests} style={styles.link}>
+          Refresh requests
+        </ThemedText>
+        <ThemedText type="default" style={styles.muted}>
+          Connected: {isConnected ? address : 'Not connected'}
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
+
+      <ThemedView style={styles.section}>
+        <ThemedText type="subtitle">Pending requests</ThemedText>
+        {status ? <ThemedText style={styles.status}>{status}</ThemedText> : null}
+        {requests.length === 0 ? (
+          <ThemedText style={styles.muted}>No requests yet.</ThemedText>
+        ) : (
+          requests.map((request, index) => (
+            <ThemedView key={`${request.requester}-${index}`} style={styles.card}>
+              <ThemedText type="defaultSemiBold">{request.requester}</ThemedText>
+              <ThemedText style={styles.muted}>
+                {new Date(Number(request.timestamp) * 1000).toLocaleString()}
+              </ThemedText>
+              <ThemedText style={styles.status}>
+                Status: {requestStatusLabel(request.status)}
+              </ThemedText>
+              {request.status === 0n ? (
+                <View style={styles.inline}>
+                  <ThemedText
+                    onPress={() => resolveRequest(index, true)}
+                    style={styles.primaryButton}
+                  >
+                    Approve
+                  </ThemedText>
+                  <ThemedText
+                    onPress={() => resolveRequest(index, false)}
+                    style={styles.secondaryButton}
+                  >
+                    Reject
+                  </ThemedText>
+                </View>
+              ) : null}
+            </ThemedView>
+          ))
+        )}
       </ThemedView>
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  headerAccent: {
+    height: 180,
+    borderRadius: 24,
+    backgroundColor: '#c3d3e6',
+  },
   titleContainer: {
+    gap: 8,
+  },
+  section: {
+    gap: 12,
+    marginTop: 8,
+  },
+  card: {
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#dde3ea',
+    gap: 6,
+  },
+  link: {
+    color: '#0b2a4a',
+    fontWeight: '600',
+  },
+  inline: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    gap: 12,
+    marginTop: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  primaryButton: {
+    backgroundColor: '#0b2a4a',
+    color: '#fff',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 999,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  secondaryButton: {
+    backgroundColor: '#e6ebf2',
+    color: '#0c1b2a',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+  },
+  muted: {
+    opacity: 0.7,
+  },
+  status: {
+    color: '#2f3e4e',
   },
 });

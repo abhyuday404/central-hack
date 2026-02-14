@@ -6,7 +6,10 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "check-types": "turbo run check-types",
+    "sync-abi": "pnpm --filter contracts run sync-abi",
+    "dev:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\dev-local.ps1",
+    "set-local-address": "node scripts/update-local-address.js"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

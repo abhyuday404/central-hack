@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const { File } = require("node:buffer");
 const { PinataSDK } = require("pinata-web3");
 
 const app = express();
