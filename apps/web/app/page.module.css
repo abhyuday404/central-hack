@@ -4,7 +4,7 @@
 .layout {
   display: flex;
   min-height: 100svh;
-  background: #f4f5f0;
+  background: #f8fafc;
   font-family: var(--font-geist-sans);
   color: #0c1b2a;
 }
@@ -15,7 +15,8 @@
 .sidebar {
   width: 240px;
   min-width: 240px;
-  background: #1a1f2e;
+  background: #f8fafc;
+  border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -25,6 +26,7 @@
   bottom: 0;
   z-index: 100;
   overflow-y: auto;
+  transition: transform 0.22s ease;
 }
 
 .sidebarTop {
@@ -42,18 +44,15 @@
 .logoIcon {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+  border-radius: 6px;
+  background: #111111;
+  flex-shrink: 0;
 }
 
 .logoText {
   font-size: 18px;
   font-weight: 700;
-  color: #fff;
+  color: #111827;
   letter-spacing: -0.02em;
 }
 
@@ -71,7 +70,7 @@
   border-radius: 10px;
   border: none;
   background: transparent;
-  color: #9ca3b0;
+  color: #4b5563;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -83,19 +82,19 @@
 }
 
 .navItem:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #d1d5db;
+  background: #eceff3;
+  color: #111827;
 }
 
 .navItemActive {
-  background: #2563eb;
-  color: #fff;
+  background: #dfe3e8;
+  color: #111827;
   font-weight: 600;
 }
 
 .navItemActive:hover {
-  background: #2563eb;
-  color: #fff;
+  background: #dfe3e8;
+  color: #111827;
 }
 
 .navBadge {
@@ -111,14 +110,14 @@
 
 .sidebarDivider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #e5e7eb;
   margin: 16px 4px;
 }
 
 .sidebarSectionLabel {
   font-size: 10px;
   font-weight: 700;
-  color: #6b7280;
+  color: #94a3b8;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 0 4px;
@@ -140,11 +139,11 @@
   width: 36px;
   height: 36px;
   border-radius: 18px;
-  background: #374151;
+  background: #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: #6b7280;
   flex-shrink: 0;
 }
 
@@ -158,7 +157,7 @@
 .sidebarUserName {
   font-size: 13px;
   font-weight: 600;
-  color: #e5e7eb;
+  color: #1f2937;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -185,8 +184,8 @@
 }
 
 .sidebarLogout:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #d1d5db;
+  background: #eceff3;
+  color: #374151;
 }
 
 .sidebarWallet {
@@ -211,12 +210,30 @@
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+  transition: margin-left 0.22s ease;
+}
+
+.layoutSidebarOpen .sidebar {
+  transform: translateX(0);
+}
+
+.layoutSidebarClosed .sidebar {
+  transform: translateX(-100%);
+}
+
+.layoutSidebarOpen .main {
+  margin-left: 240px;
+}
+
+.layoutSidebarClosed .main {
+  margin-left: 0;
 }
 
 .mainContent {
   flex: 1;
   padding: 28px 32px 48px;
   overflow-y: auto;
+  background: #f3f6fa;
 }
 
 /* ================================================================== */
@@ -225,33 +242,52 @@
 .topBar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 24px;
-  padding: 16px 32px;
-  background: #fff;
+  padding: 12px 24px;
+  background: #f8fafc;
   border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 50;
 }
 
+.topBarMenuBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f1f5f9;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.topBarMenuBtn:hover {
+  background: #e2e8f0;
+}
+
 .searchBox {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: #f1f5f9;
+  border: 1px solid #d8e1ea;
   border-radius: 10px;
-  padding: 9px 16px;
+  padding: 8px 12px;
   flex: 1;
-  max-width: 520px;
+  max-width: 460px;
 }
 
 .searchInput {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 13px;
+  font-size: 12.5px;
   color: #374151;
   flex: 1;
   font-family: inherit;
@@ -265,6 +301,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-left: auto;
 }
 
 .networkBadge {
@@ -294,7 +331,7 @@
   height: 38px;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
-  background: #fff;
+  background: #f8fafc;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -313,7 +350,11 @@
 .viewContent {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+  background: #eef3f8;
+  border: 1px solid #dde7f1;
+  border-radius: 16px;
+  padding: 16px;
 }
 
 .viewHeader {
@@ -324,17 +365,19 @@
 }
 
 .viewTitle {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 .viewSubtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: #6b7280;
   font-weight: 400;
+  line-height: 1.35;
 }
 
 .viewActions {
@@ -351,8 +394,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 20px;
-  background: #1a1f2e;
+  padding: 8px 16px;
+  background: #64748b;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -365,9 +408,9 @@
 }
 
 .btnPrimary:hover {
-  background: #111827;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #475569;
+  transform: none;
+  box-shadow: none;
 }
 
 .btnPrimary:disabled {
@@ -381,8 +424,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 18px;
-  background: #fff;
+  padding: 8px 14px;
+  background: #f7fafd;
   color: #374151;
   border: 1px solid #d1d5db;
   border-radius: 10px;
@@ -409,7 +452,7 @@
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  background: #fff;
+  background: #f7fafd;
   color: #374151;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -479,30 +522,33 @@
 }
 
 .statCard {
-  background: #fff;
-  border-radius: 16px;
+  background: #f8fbff;
+  border-radius: 14px;
   padding: 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
 .statCardBlue {
-  border-left: 4px solid #3b82f6;
+  background: #ede1f9;
+  border-color: transparent;
 }
 
 .statCardAmber {
-  border-left: 4px solid #f59e0b;
-  background: #fffbeb;
+  background: #fdf3c5;
+  border-color: transparent;
 }
 
 .statCardRed {
-  border-left: 4px solid #ef4444;
+  background: #d0ebf4;
+  border-color: transparent;
 }
 
 .statCardGreen {
-  border-left: 4px solid #10b981;
+  background: #e3f3d8;
+  border-color: transparent;
 }
 
 .statCardTop {
@@ -513,29 +559,25 @@
 }
 
 .statIconWrap {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .statCardBlue .statIconWrap {
-  background: #eff6ff;
+  background: transparent;
 }
 
 .statCardAmber .statIconWrap {
-  background: #fef3c7;
+  background: transparent;
 }
 
 .statCardRed .statIconWrap {
-  background: #fef2f2;
+  background: transparent;
 }
 
 .statCardGreen .statIconWrap {
-  background: #ecfdf5;
+  background: transparent;
 }
 
 .statTrend {
@@ -544,15 +586,15 @@
   gap: 4px;
   font-size: 11px;
   font-weight: 600;
-  color: #10b981;
+  color: #814DB6;
   background: #ecfdf5;
-  padding: 3px 10px;
-  border-radius: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
 }
 
 .statTrendWarn {
-  color: #f59e0b;
-  background: #fef3c7;
+  color: #9a6700;
+  background: #ffffff;
 }
 
 .statLabel {
@@ -573,9 +615,9 @@
 /*  TABLE CARD (shared)                                               */
 /* ================================================================== */
 .tableCard {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
+  background: #f8fbff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
 }
 
@@ -620,7 +662,7 @@
   border-radius: 8px;
   font-size: 13px;
   color: #374151;
-  background: #fff;
+  background: #f7fafd;
   cursor: pointer;
   font-family: inherit;
   appearance: none;
@@ -652,16 +694,17 @@
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-bottom: 1px solid #dbe7f2;
+  background: #edf3f9;
   white-space: nowrap;
 }
 
 .table tbody td {
   padding: 14px 24px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e4edf6;
   vertical-align: middle;
   color: #374151;
+  background: #f8fbff;
 }
 
 .table tbody tr:last-child td {
@@ -669,7 +712,7 @@
 }
 
 .table tbody tr:hover {
-  background: #fafbfc;
+  background: #eef4fb;
 }
 
 .tableEmpty {
@@ -684,8 +727,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-top: 1px solid #dbe7f2;
+  background: #eef3f8;
 }
 
 .tableFooterText {
@@ -761,21 +804,21 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .badgeAvailable {
-  background: #ecfdf5;
-  color: #15803d;
+  background: #e8f7ef;
+  color: #1d7a4a;
 }
 
 .badgePending {
-  background: #fef3c7;
-  color: #92400e;
+  background: #fff3d6;
+  color: #9a6700;
 }
 
 .badgeArchived {
@@ -789,8 +832,8 @@
 }
 
 .badgeAction {
-  background: #fef2f2;
-  color: #dc2626;
+  background: #fce7ef;
+  color: #b42318;
 }
 
 /* ================================================================== */
@@ -805,9 +848,9 @@
 .pageBtn {
   min-width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #e5e7eb;
-  background: #fff;
+  background: #f7fafd;
   color: #374151;
   font-size: 13px;
   font-weight: 500;
@@ -855,7 +898,7 @@
   padding: 7px 16px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
-  background: #fff;
+  background: #f7fafd;
   color: #374151;
   font-size: 13px;
   font-weight: 500;
@@ -890,6 +933,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .recordTypeCell strong {
@@ -927,21 +971,25 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  background: linear-gradient(90deg, #eef4ff 0%, #f6f8fc 100%);
+  border: 1px solid #dbe6f3;
+  border-radius: 14px;
+  padding: 10px;
 }
 
 .patientSearchInput {
   flex: 1;
   padding: 11px 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #c8d4e3;
   border-radius: 10px;
   font-size: 14px;
   color: #374151;
-  background: #fff;
+  background: #ffffff;
   font-family: inherit;
 }
 
 .patientSearchInput:focus {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #99b7d8;
   outline-offset: 1px;
 }
 
@@ -960,9 +1008,10 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #f9fcff 0%, #f3f8ff 100%);
+  border-radius: 14px;
+  border: 1px solid #dbe7f2;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.06);
   padding: 24px;
 }
 
@@ -1011,6 +1060,9 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  background: #eef3f8;
+  border-radius: 999px;
+  padding: 3px 10px;
 }
 
 .patientAddressRow {
@@ -1022,18 +1074,18 @@
 
 .addressCode {
   padding: 5px 14px;
-  background: #f3f4f6;
+  background: #ede1f9;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: #4c1d95;
   font-family: var(--font-geist-mono), monospace;
 }
 
 .copyBtn {
   background: none;
   border: none;
-  color: #6366f1;
+  color: #2563eb;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -1043,7 +1095,7 @@
 }
 
 .copyBtn:hover {
-  color: #4f46e5;
+  color: #1d4ed8;
 }
 
 .patientCardRight {
@@ -1077,13 +1129,13 @@
 }
 
 .consentGranted {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: #e3f3d8;
+  border: 1px solid #bfd9ad;
 }
 
 .consentDenied {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: #fde5e8;
+  border: 1px solid #f6c5cd;
 }
 
 .consentActions {
@@ -1106,14 +1158,15 @@
 .uploadGrid {
   display: grid;
   grid-template-columns: 380px 1fr;
-  gap: 24px;
+  gap: 20px;
   align-items: flex-start;
 }
 
 .uploadCard {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+  border-radius: 14px;
+  border: 1px solid #dbe7f2;
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.08);
   padding: 28px 24px;
   display: flex;
   flex-direction: column;
@@ -1124,7 +1177,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #111827;
+  color: #1e3a8a;
 }
 
 .uploadCardHeader h2 {
@@ -1134,7 +1187,7 @@
 
 .uploadDesc {
   font-size: 13px;
-  color: #6b7280;
+  color: #64748b;
   line-height: 1.5;
   margin-top: -8px;
 }
@@ -1142,47 +1195,47 @@
 .formLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: #475569;
   margin-bottom: -8px;
 }
 
 .formInput {
   padding: 10px 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
   font-size: 13px;
   color: #374151;
-  background: #fff;
+  background: #f7fafd;
   font-family: inherit;
 }
 
 .formInput:focus {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #94a3b8;
   outline-offset: 1px;
 }
 
 .formInputDark {
   padding: 10px 14px;
-  border: 1px solid #374151;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
   font-size: 13px;
-  color: #e5e7eb;
-  background: #1f2937;
+  color: #0f172a;
+  background: #f8fafc;
   font-family: var(--font-geist-mono), monospace;
 }
 
 .formInputDark:focus {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #94a3b8;
   outline-offset: 1px;
 }
 
 .formSelect {
   padding: 10px 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
   font-size: 13px;
   color: #374151;
-  background: #fff;
+  background: #f7fafd;
   cursor: pointer;
   font-family: inherit;
   appearance: none;
@@ -1193,14 +1246,14 @@
 }
 
 .formSelect:focus {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #94a3b8;
   outline-offset: 1px;
 }
 
 .dropZone {
-  border: 2px dashed #d1d5db;
+  border: 1px dashed #94a3b8;
   border-radius: 12px;
-  padding: 32px 20px;
+  padding: 28px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1208,17 +1261,17 @@
   gap: 8px;
   cursor: pointer;
   transition: all 0.15s;
-  background: #fafbfc;
+  background: linear-gradient(180deg, #f2f7ff 0%, #e8f2ff 100%);
 }
 
 .dropZone:hover {
-  border-color: #9ca3af;
-  background: #f3f4f6;
+  border-color: #4f87c6;
+  background: #deecff;
 }
 
 .dropZoneActive {
-  border-color: #6366f1;
-  background: #eef2ff;
+  border-color: #5d93cf;
+  background: #c5e2ff;
 }
 
 .dropText {
@@ -1229,7 +1282,7 @@
 
 .dropHint {
   font-size: 11px;
-  color: #9ca3af;
+  color: #64748b;
 }
 
 .dropZoneFile {
@@ -1257,7 +1310,7 @@
   justify-content: center;
   gap: 10px;
   padding: 12px 20px;
-  background: #ef4444;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -1269,9 +1322,9 @@
 }
 
 .btnUpload:hover:not(:disabled) {
-  background: #dc2626;
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
 }
 
 .btnUpload:disabled {
@@ -1285,9 +1338,9 @@
   display: flex;
   gap: 12px;
   padding: 14px 16px;
-  background: #eff6ff;
+  background: #ede1f9;
   border-radius: 12px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #d9c3ec;
   align-items: flex-start;
 }
 
@@ -1295,13 +1348,13 @@
   display: block;
   font-size: 13px;
   font-weight: 700;
-  color: #1d4ed8;
+  color: #6d28d9;
   margin-bottom: 2px;
 }
 
 .complianceNotice p {
   font-size: 12px;
-  color: #3b82f6;
+  color: #7c3aed;
   line-height: 1.5;
   margin: 0;
 }
@@ -1310,14 +1363,16 @@
 /*  VERIFICATION CARD (Uploads page)                                  */
 /* ================================================================== */
 .verificationCard {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #f9fcff 0%, #f3f8ff 100%);
+  border-radius: 14px;
+  border: 1px solid #dbe7f2;
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.08);
   overflow: hidden;
 }
 
 .verificationHeader {
-  padding: 24px 24px 0;
+  padding: 24px 24px 8px;
+  background: linear-gradient(90deg, #f2f8ff 0%, #f7fbff 100%);
 }
 
 .verificationTitle {
@@ -1330,12 +1385,12 @@
 .verificationTitle h2 {
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: #1e3a8a;
 }
 
 .verificationDesc {
   font-size: 13px;
-  color: #6b7280;
+  color: #54708f;
   margin-bottom: 16px;
 }
 
@@ -1353,9 +1408,9 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  color: #6b7280;
+  border: 1px solid #bcd0e5;
+  background: #f8fafc;
+  color: #4a6380;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1365,7 +1420,7 @@
 }
 
 .filterIconBtn:hover {
-  background: #f3f4f6;
+  background: #e7f0fb;
 }
 
 .queueActions {
@@ -1378,8 +1433,8 @@
   height: 30px;
   border-radius: 8px;
   border: none;
-  background: #ecfdf5;
-  color: #15803d;
+  background: #e3f3d8;
+  color: #2f6f2f;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
@@ -1390,7 +1445,7 @@
 }
 
 .approveSmBtn:hover {
-  background: #dcfce7;
+  background: #d3eac5;
 }
 
 .rejectSmBtn {
@@ -1398,8 +1453,8 @@
   height: 30px;
   border-radius: 8px;
   border: none;
-  background: #fef2f2;
-  color: #dc2626;
+  background: #fce6d9;
+  color: #b45309;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
@@ -1410,7 +1465,7 @@
 }
 
 .rejectSmBtn:hover {
-  background: #fee2e2;
+  background: #f7d6c2;
 }
 
 /* ================================================================== */
@@ -1532,8 +1587,12 @@
     min-width: 200px;
   }
 
-  .main {
+  .layoutSidebarOpen .main {
     margin-left: 200px;
+  }
+
+  .layoutSidebarClosed .main {
+    margin-left: 0;
   }
 
   .mainContent {
@@ -1564,6 +1623,10 @@
 
 @media (max-width: 640px) {
   .sidebar {
+    display: none;
+  }
+
+  .topBarMenuBtn {
     display: none;
   }
 
