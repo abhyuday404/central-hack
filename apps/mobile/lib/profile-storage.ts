@@ -2,6 +2,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const PROFILE_KEY = "central-hack:user_profile";
 
+export type TrustedContact = {
+  id: string;
+  walletAddress: string;
+  label: string;
+  relationship: string;
+  addedAt: string;
+};
+
 export type UserProfile = {
   // Personal Details
   fullName: string;
@@ -37,6 +45,9 @@ export type UserProfile = {
   // Recovery Key
   recoveryKeyGenerated: boolean;
   recoveryKeyGeneratedAt: string;
+
+  // Trusted Circle
+  trustedCircle: TrustedContact[];
 };
 
 export type ImmunizationRecord = {
@@ -105,6 +116,8 @@ export const DEFAULT_PROFILE: UserProfile = {
 
   recoveryKeyGenerated: true,
   recoveryKeyGeneratedAt: "2024-12-01T10:30:00Z",
+
+  trustedCircle: [],
 };
 
 export async function loadProfile(): Promise<UserProfile> {
@@ -184,4 +197,68 @@ export async function removeCondition(condition: string): Promise<UserProfile> {
   current.conditions = current.conditions.filter((c) => c !== condition);
   await saveProfile(current);
   return current;
+}
+
+// ── Trusted Circle helpers ──────────────────────────────────────────
+
+export async function addTrustedContact(
+  contact: Omit<TrustedContact, "id" | "addedAt">,
+): Promise<UserProfile> {
+  const current = await loadProfile();
+  const normalized = contact.walletAddress.toLowerCase();
+
+  // Prevent duplicates by wallet address
+  if (
+    current.trustedCircle.some(
+      (c) => c.walletAddress.toLowerCase() === normalized,
+    )
+  ) {
+    throw new Error("This address is already in your trusted circle.");
+  }
+
+  const newContact: TrustedContact = {
+    id: `tc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    walletAddress: contact.walletAddress,
+    label: contact.label,
+    relationship: contact.relationship,
+    addedAt: new Date().toISOString(),
+  };
+
+  current.trustedCircle.push(newContact);
+  await saveProfile(current);
+  return current;
+}
+
+export async function removeTrustedContact(id: string): Promise<UserProfile> {
+  const current = await loadProfile();
+  current.trustedCircle = current.trustedCircle.filter((c) => c.id !== id);
+  await saveProfile(current);
+  return current;
+}
+
+export async function updateTrustedContact(
+  id: string,
+  updates: Partial<Omit<TrustedContact, "id" | "addedAt">>,
+): Promise<UserProfile> {
+  const current = await loadProfile();
+  const index = current.trustedCircle.findIndex((c) => c.id === id);
+  if (index === -1) {
+    throw new Error("Trusted contact not found.");
+  }
+  current.trustedCircle[index] = {
+    ...current.trustedCircle[index],
+    ...updates,
+  };
+  await saveProfile(current);
+  return current;
+}
+
+export function isTrustedAddress(
+  trustedCircle: TrustedContact[],
+  address: string,
+): boolean {
+  const normalized = address.toLowerCase();
+  return trustedCircle.some(
+    (c) => c.walletAddress.toLowerCase() === normalized,
+  );
 }

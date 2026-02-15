@@ -89,6 +89,16 @@ const menuItems: MenuItem[] = [
     route: "/data-sharing",
   },
   {
+    id: "trusted-circle",
+    label: "Trusted Circle",
+    subtitle: "Family, caregivers & providers",
+    icon: "person.2.fill",
+    iconColor: "#0EA5E9",
+    iconBgColor: "#F0F9FF",
+    type: "navigate",
+    route: "/trusted-circle",
+  },
+  {
     id: "past",
     label: "Past Visits",
     subtitle: "Medical visit history",

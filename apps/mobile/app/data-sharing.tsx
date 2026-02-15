@@ -26,6 +26,7 @@ import {
   requestStatusLabel,
   type AccessRequest,
 } from "@/lib/medicalRecord";
+import { loadProfile, type TrustedContact } from "@/lib/profile-storage";
 
 type ActiveAccessor = {
   address: string;
@@ -45,6 +46,31 @@ export default function DataSharingScreen() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("active");
+  const [trustedCircle, setTrustedCircle] = useState<TrustedContact[]>([]);
+
+  // Load trusted circle from local profile
+  useEffect(() => {
+    (async () => {
+      try {
+        const profile = await loadProfile();
+        setTrustedCircle(profile.trustedCircle ?? []);
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  /** Find the label of a trusted contact by wallet address, if any */
+  const getTrustedLabel = useCallback(
+    (addr: string): string | null => {
+      const normalized = addr.toLowerCase();
+      const match = trustedCircle.find(
+        (c) => c.walletAddress.toLowerCase() === normalized,
+      );
+      return match ? match.label : null;
+    },
+    [trustedCircle],
+  );
 
   const loadData = useCallback(async () => {
     if (!signer || !address) return;
@@ -61,7 +87,16 @@ export default function DataSharingScreen() {
         ) as Promise<[string[], bigint[]]>,
       ]);
 
-      setRequests(Array.from(reqData));
+      setRequests(
+        Array.from(reqData).map((r: any) => ({
+          requester: r.requester ?? r[0],
+          timestamp: r.timestamp ?? r[1],
+          status: r.status ?? r[2],
+          durationInHours: r.durationInHours ?? r[3],
+          grantedAt: r.grantedAt ?? r[4],
+          expiresAt: r.expiresAt ?? r[5],
+        })),
+      );
 
       const [addrs, expiries] = accessData;
       const accessors: ActiveAccessor[] = [];
@@ -381,18 +416,51 @@ export default function DataSharingScreen() {
                       ? "#F59E0B"
                       : "#22C55E";
 
+                const activeTrustedLabel = getTrustedLabel(accessor.address);
+                const isActiveTrusted = activeTrustedLabel !== null;
+
                 return (
-                  <View key={accessor.address} style={styles.activeCard}>
+                  <View
+                    key={accessor.address}
+                    style={[
+                      styles.activeCard,
+                      isActiveTrusted && styles.trustedActiveCard,
+                    ]}
+                  >
+                    {isActiveTrusted && (
+                      <View style={styles.trustedBanner}>
+                        <IconSymbol
+                          name="checkmark.shield.fill"
+                          size={12}
+                          color="#6366F1"
+                        />
+                        <Text style={styles.trustedBannerText}>
+                          Trusted · {activeTrustedLabel}
+                        </Text>
+                      </View>
+                    )}
                     <View style={styles.activeCardTop}>
                       <View style={styles.activeCardUser}>
-                        <View style={styles.avatarCircle}>
-                          <Text style={styles.avatarText}>
+                        <View
+                          style={[
+                            styles.avatarCircle,
+                            isActiveTrusted && { backgroundColor: "#EEF2FF" },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.avatarText,
+                              isActiveTrusted && { color: "#6366F1" },
+                            ]}
+                          >
                             {accessor.address.slice(2, 4).toUpperCase()}
                           </Text>
                         </View>
                         <View style={styles.activeCardInfo}>
                           <Text style={styles.activeCardName}>
-                            Dr. {accessor.address.slice(2, 6).toUpperCase()}
+                            {isActiveTrusted
+                              ? activeTrustedLabel
+                              : `Dr. ${accessor.address.slice(2, 6).toUpperCase()}`}
                           </Text>
                           <Text style={styles.activeCardAddress}>
                             {truncateAddress(accessor.address)}
@@ -473,34 +541,81 @@ export default function DataSharingScreen() {
                 const isDenying = actionLoading === denyKey;
                 const isAnyAction = isApproving || isDenying;
 
+                const trustedLabel = getTrustedLabel(req.requester);
+                const isTrusted = trustedLabel !== null;
+
                 return (
-                  <View key={`pending-${req.index}`} style={styles.pendingCard}>
+                  <View
+                    key={`pending-${req.index}`}
+                    style={[
+                      styles.pendingCard,
+                      isTrusted && styles.trustedPendingCard,
+                    ]}
+                  >
+                    {isTrusted && (
+                      <View style={styles.trustedBanner}>
+                        <IconSymbol
+                          name="checkmark.shield.fill"
+                          size={12}
+                          color="#6366F1"
+                        />
+                        <Text style={styles.trustedBannerText}>
+                          Trusted · {trustedLabel}
+                        </Text>
+                      </View>
+                    )}
                     <View style={styles.pendingCardTop}>
                       <View style={styles.activeCardUser}>
                         <View
                           style={[
                             styles.avatarCircle,
-                            { backgroundColor: "#FEF3C7" },
+                            {
+                              backgroundColor: isTrusted
+                                ? "#EEF2FF"
+                                : "#FEF3C7",
+                            },
                           ]}
                         >
                           <Text
-                            style={[styles.avatarText, { color: "#D97706" }]}
+                            style={[
+                              styles.avatarText,
+                              { color: isTrusted ? "#6366F1" : "#D97706" },
+                            ]}
                           >
                             {req.requester.slice(2, 4).toUpperCase()}
                           </Text>
                         </View>
                         <View style={styles.activeCardInfo}>
                           <Text style={styles.activeCardName}>
-                            Dr. {req.requester.slice(2, 6).toUpperCase()}
+                            {isTrusted
+                              ? trustedLabel
+                              : `Dr. ${req.requester.slice(2, 6).toUpperCase()}`}
                           </Text>
                           <Text style={styles.activeCardAddress}>
                             {truncateAddress(req.requester)}
                           </Text>
                         </View>
                       </View>
-                      <View style={styles.pendingBadge}>
-                        <View style={styles.pendingDot} />
-                        <Text style={styles.pendingBadgeText}>Pending</Text>
+                      <View
+                        style={[
+                          styles.pendingBadge,
+                          isTrusted && styles.trustedPendingBadge,
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.pendingDot,
+                            isTrusted && { backgroundColor: "#6366F1" },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.pendingBadgeText,
+                            isTrusted && { color: "#6366F1" },
+                          ]}
+                        >
+                          {isTrusted ? "Trusted" : "Pending"}
+                        </Text>
                       </View>
                     </View>
 
@@ -1140,6 +1255,37 @@ const styles = StyleSheet.create({
   },
   logStatusText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
+  },
+
+  // Trusted Circle badges for pending requests
+  trustedPendingCard: {
+    borderColor: "#C7D2FE",
+    borderWidth: 1.5,
+    backgroundColor: "#FAFAFE",
+  },
+  trustedBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#EEF2FF",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginBottom: 10,
+    alignSelf: "flex-start",
+  },
+  trustedBannerText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#6366F1",
+  },
+  trustedPendingBadge: {
+    backgroundColor: "#EEF2FF",
+  },
+  trustedActiveCard: {
+    borderColor: "#C7D2FE",
+    borderWidth: 1.5,
+    backgroundColor: "#FAFAFE",
   },
 });

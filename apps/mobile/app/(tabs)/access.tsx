@@ -56,7 +56,16 @@ export default function AccessScreen() {
         ) as Promise<[string[], bigint[]]>,
       ]);
 
-      setRequests(Array.from(reqData));
+      setRequests(
+        Array.from(reqData).map((r: any) => ({
+          requester: r.requester ?? r[0],
+          timestamp: r.timestamp ?? r[1],
+          status: r.status ?? r[2],
+          durationInHours: r.durationInHours ?? r[3],
+          grantedAt: r.grantedAt ?? r[4],
+          expiresAt: r.expiresAt ?? r[5],
+        })),
+      );
 
       const [addrs, expiries] = accessData;
       const accessors: ActiveAccessor[] = [];

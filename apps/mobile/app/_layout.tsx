@@ -111,6 +111,8 @@ export default function RootLayout() {
         <Stack.Screen name="recovery-key" options={{ headerShown: false }} />
         <Stack.Screen name="help-support" options={{ headerShown: false }} />
         <Stack.Screen name="upload-record" options={{ headerShown: false }} />
+        <Stack.Screen name="trusted-circle" options={{ headerShown: false }} />
+        <Stack.Screen name="ai-assist" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

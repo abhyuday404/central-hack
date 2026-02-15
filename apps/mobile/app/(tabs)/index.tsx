@@ -327,6 +327,48 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+        {/* AI Health Assist Card */}
+        <TouchableOpacity
+          style={[styles.infoCard, styles.aiAssistCard]}
+          activeOpacity={0.7}
+          onPress={() => router.push("/ai-assist" as any)}
+        >
+          <View style={styles.aiAssistHeader}>
+            <View style={styles.aiAssistIconWrap}>
+              <IconSymbol name="sparkles" size={20} color="#FFFFFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.aiAssistTitle}>Health AI Assist</Text>
+              <Text style={styles.aiAssistSubtitle}>
+                Get insights from your records
+              </Text>
+            </View>
+            <IconSymbol name="chevron.right" size={16} color="#E53935" />
+          </View>
+          <View style={styles.aiAssistChips}>
+            <View style={styles.aiAssistChip}>
+              <IconSymbol
+                name="heart.text.clipboard"
+                size={12}
+                color="#E53935"
+              />
+              <Text style={styles.aiAssistChipText}>Health Summary</Text>
+            </View>
+            <View style={styles.aiAssistChip}>
+              <IconSymbol
+                name="exclamationmark.triangle.fill"
+                size={12}
+                color="#F59E0B"
+              />
+              <Text style={styles.aiAssistChipText}>Allergy Check</Text>
+            </View>
+            <View style={styles.aiAssistChip}>
+              <IconSymbol name="stethoscope" size={12} color="#22C55E" />
+              <Text style={styles.aiAssistChipText}>Ask Questions</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         {/* Access History Card */}
         <View style={[styles.infoCard, styles.accessHistoryCard]}>
           <Text style={styles.cardTitle}>Access History</Text>
@@ -787,6 +829,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: "#111827",
+  },
+  aiAssistCard: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FECACA",
+    marginBottom: 12,
+  },
+  aiAssistHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  aiAssistIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#E53935",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  aiAssistTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  aiAssistSubtitle: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  aiAssistChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 14,
+  },
+  aiAssistChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  aiAssistChipText: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: "#374151",
   },
   accessHistoryCard: {
     backgroundColor: "#ffc5ac",
