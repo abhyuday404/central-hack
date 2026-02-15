@@ -12,14 +12,17 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useDevWalletContext } from "@/lib/wallet";
 import {
   getMedicalRecordContractWithSigner,
+  safeContractCall,
   requestStatusLabel,
   type AccessRequest,
   type RecordItem,
 } from "@/lib/medicalRecord";
+import { loadProfile, type UserProfile } from "@/lib/profile-storage";
 
 function truncateAddress(addr: string): string {
   if (addr.length <= 12) return addr;
@@ -49,12 +52,43 @@ export default function DashboardScreen() {
   const [accessHistory, setAccessHistory] = useState<HistoryEntry[]>([]);
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  // Load profile data from storage every time the screen is focused
+  const fetchProfile = useCallback(async () => {
+    try {
+      const data = await loadProfile();
+      setProfile(data);
+    } catch {
+      // fallback handled by loadProfile defaults
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [fetchProfile]),
+  );
+
+  // Derived profile values with fallbacks
+  const displayName = profile?.fullName || "User";
+  const firstName = displayName.split(" ")[0];
+  const passportId = profile?.passportId || "—";
+  const bloodGroup = profile?.bloodGroup || "—";
+  const allergiesDisplay =
+    profile?.allergies && profile.allergies.length > 0
+      ? profile.allergies.join(", ")
+      : "None";
+  const insuranceStatus = profile?.insuranceStatus || "none";
+  const insuranceProvider = profile?.insuranceProvider || "—";
 
   const loadRecords = useCallback(async () => {
     if (!signer || !address) return;
     try {
       const contract = getMedicalRecordContractWithSigner(signer);
-      const data = (await contract.getRecords(address)) as RecordItem[];
+      const data = (await safeContractCall(signer, () =>
+        contract.getRecords(address),
+      )) as RecordItem[];
       setRecords(data);
     } catch {
       // silently fail on dashboard
@@ -66,7 +100,9 @@ export default function DashboardScreen() {
     try {
       setLoadingHistory(true);
       const contract = getMedicalRecordContractWithSigner(signer);
-      const data = (await contract.getRequests(address)) as AccessRequest[];
+      const data = (await safeContractCall(signer, () =>
+        contract.getRequests(address),
+      )) as AccessRequest[];
       setAccessHistory(data);
     } catch {
       // silently fail
@@ -154,7 +190,7 @@ export default function DashboardScreen() {
             </View>
             <View>
               <Text style={styles.welcomeText}>Welcome back,</Text>
-              <Text style={styles.welcomeName}>Hello, Nimesha!</Text>
+              <Text style={styles.welcomeName}>Hello, {firstName}!</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
@@ -170,21 +206,21 @@ export default function DashboardScreen() {
           <View style={styles.userInfoHeader}>
             <View>
               <Text style={styles.userInfoLabel}>Name</Text>
-              <Text style={styles.userInfoName}>Nimesha S</Text>
+              <Text style={styles.userInfoName}>{displayName}</Text>
             </View>
             <View style={styles.idBadge}>
-              <Text style={styles.idBadgeText}>ID: #6767-NS</Text>
+              <Text style={styles.idBadgeText}>ID: {passportId}</Text>
             </View>
           </View>
 
           <View style={styles.userInfoRow}>
             <View style={styles.userInfoItem}>
               <Text style={styles.userInfoLabel}>Blood Group</Text>
-              <Text style={styles.userInfoValue}>O+</Text>
+              <Text style={styles.userInfoValue}>{bloodGroup}</Text>
             </View>
             <View style={styles.userInfoItem}>
               <Text style={styles.userInfoLabel}>Allergies</Text>
-              <Text style={styles.userInfoValue}>Dairy, Peanuts</Text>
+              <Text style={styles.userInfoValue}>{allergiesDisplay}</Text>
             </View>
           </View>
 
@@ -263,21 +299,75 @@ export default function DashboardScreen() {
             </View>
 
             {/* Insurance Card */}
-            <View style={[styles.infoCard, styles.insuranceCard]}>
+            <TouchableOpacity
+              style={[styles.infoCard, styles.insuranceCard]}
+              activeOpacity={0.7}
+              onPress={() => router.push("/insurance" as any)}
+            >
               <Text style={styles.cardTitle}>Insurance</Text>
               <View style={styles.insuranceContent}>
                 <View style={styles.insuranceStat}>
-                  <Text style={styles.insuranceLabel}>Pending Claims</Text>
-                  <Text style={styles.insuranceValue}>1</Text>
+                  <Text style={styles.insuranceLabel}>Status</Text>
+                  <Text style={styles.insuranceValue}>
+                    {insuranceStatus === "active"
+                      ? "Active"
+                      : insuranceStatus === "expired"
+                        ? "Expired"
+                        : "None"}
+                  </Text>
                 </View>
                 <View style={styles.insuranceStat}>
-                  <Text style={styles.insuranceLabel}>Approved</Text>
-                  <Text style={styles.insuranceValue}>2</Text>
+                  <Text style={styles.insuranceLabel}>Provider</Text>
+                  <Text style={styles.insuranceValue} numberOfLines={1}>
+                    {insuranceProvider}
+                  </Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
+
+        {/* AI Health Assist Card */}
+        <TouchableOpacity
+          style={[styles.infoCard, styles.aiAssistCard]}
+          activeOpacity={0.7}
+          onPress={() => router.push("/ai-assist" as any)}
+        >
+          <View style={styles.aiAssistHeader}>
+            <View style={styles.aiAssistIconWrap}>
+              <IconSymbol name="sparkles" size={20} color="#FFFFFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.aiAssistTitle}>Health AI Assist</Text>
+              <Text style={styles.aiAssistSubtitle}>
+                Get insights from your records
+              </Text>
+            </View>
+            <IconSymbol name="chevron.right" size={16} color="#E53935" />
+          </View>
+          <View style={styles.aiAssistChips}>
+            <View style={styles.aiAssistChip}>
+              <IconSymbol
+                name="heart.text.clipboard"
+                size={12}
+                color="#E53935"
+              />
+              <Text style={styles.aiAssistChipText}>Health Summary</Text>
+            </View>
+            <View style={styles.aiAssistChip}>
+              <IconSymbol
+                name="exclamationmark.triangle.fill"
+                size={12}
+                color="#F59E0B"
+              />
+              <Text style={styles.aiAssistChipText}>Allergy Check</Text>
+            </View>
+            <View style={styles.aiAssistChip}>
+              <IconSymbol name="stethoscope" size={12} color="#22C55E" />
+              <Text style={styles.aiAssistChipText}>Ask Questions</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
 
         {/* Access History Card */}
         <View style={[styles.infoCard, styles.accessHistoryCard]}>
@@ -739,6 +829,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: "#111827",
+  },
+  aiAssistCard: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FECACA",
+    marginBottom: 12,
+  },
+  aiAssistHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  aiAssistIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#E53935",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  aiAssistTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  aiAssistSubtitle: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  aiAssistChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 14,
+  },
+  aiAssistChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  aiAssistChipText: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: "#374151",
   },
   accessHistoryCard: {
     backgroundColor: "#ffc5ac",

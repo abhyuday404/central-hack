@@ -99,6 +99,20 @@ export default function RootLayout() {
           name="modal"
           options={{ presentation: "modal", title: "Modal" }}
         />
+        <Stack.Screen
+          name="personal-details"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="health-details" options={{ headerShown: false }} />
+        <Stack.Screen name="insurance" options={{ headerShown: false }} />
+        <Stack.Screen name="immunization" options={{ headerShown: false }} />
+        <Stack.Screen name="data-sharing" options={{ headerShown: false }} />
+        <Stack.Screen name="past-visits" options={{ headerShown: false }} />
+        <Stack.Screen name="recovery-key" options={{ headerShown: false }} />
+        <Stack.Screen name="help-support" options={{ headerShown: false }} />
+        <Stack.Screen name="upload-record" options={{ headerShown: false }} />
+        <Stack.Screen name="trusted-circle" options={{ headerShown: false }} />
+        <Stack.Screen name="ai-assist" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
